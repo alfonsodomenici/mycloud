@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  *
  * @author tss
  */
+@RolesAllowed({"users"})
 @Stateless
 public class DocumentoStore {
 
@@ -40,19 +42,17 @@ public class DocumentoStore {
     Principal principal;
 
     @Inject
-    JsonWebToken callerPrincipal;
+    UserStore userStore;
     
-    User logged;
-
     @PostConstruct
     public void init() {
-        logged = em.find(User.class, 1l);
-
+        
     }
 
     public List<Documento> all() {
-        return em.createQuery("select e from Documento e where e.user= :usr")
-                .setParameter("usr", logged)
+        System.out.println("logged user: " + principal.getName());
+        return em.createQuery("select e from Documento e where e.user.usr= :usr")
+                .setParameter("usr", principal.getName())
                 .getResultList();
     }
 
@@ -62,7 +62,7 @@ public class DocumentoStore {
 
     
     public Documento save(Documento d, InputStream is) {
-        d.setUser(logged);
+        d.setUser(userStore.findByUsername(principal.getName()).get());
         Documento saved = em.merge(d);
         try {
             Files.copy(is, documentPath(saved.getFileName()),
@@ -84,9 +84,8 @@ public class DocumentoStore {
     }
 
     private Path documentPath(String name) {
-        System.out.println("user: " + logged + " name: " + name);
         return Paths.get(Configuration.DOCUMENT_FOLDER
-                + logged.getUsr() + "/" + name);
+                + principal.getName() + "/" + name);
     }
 
     void removeByUser(Long id) {

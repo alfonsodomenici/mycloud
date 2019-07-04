@@ -59,6 +59,18 @@ public class UserStore {
         return em.find(User.class, id);
     }
 
+    public Optional<User> findByUsername(String usr) {
+        try {
+            User p = em.createQuery("select e from User e where e.usr= :usr", User.class)
+                    .setParameter("usr", usr)
+                    .getSingleResult();
+            return Optional.of(p);
+        } catch (NoResultException | NonUniqueResultException ex) {
+            return Optional.empty();
+        }
+
+    }
+
     public User save(User a) {
         User saved = em.merge(a);
         Path path = Paths.get(Configuration.DOCUMENT_FOLDER + saved.getUsr());

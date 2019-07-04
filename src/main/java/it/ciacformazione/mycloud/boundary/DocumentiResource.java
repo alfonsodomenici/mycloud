@@ -9,6 +9,7 @@ import it.ciacformazione.mycloud.control.DocumentoStore;
 import it.ciacformazione.mycloud.entity.Documento;
 import java.io.InputStream;
 import java.util.List;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -23,6 +24,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
  *
  * @author tss
  */
+@RolesAllowed({"users"})
 @Path("/documents")
 public class DocumentiResource {
 
