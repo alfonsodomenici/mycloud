@@ -8,11 +8,16 @@ package it.ciacformazione.mycloud.boundary;
 import it.ciacformazione.mycloud.JWTManager;
 import it.ciacformazione.mycloud.control.UserStore;
 import it.ciacformazione.mycloud.entity.User;
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -23,16 +28,17 @@ import javax.ws.rs.core.Response;
  *
  * @author tss
  */
+@DenyAll
 @Path("/auth")
 public class SecurityResource {
-    
+
     @Inject
     UserStore store;
-    
+
     @PermitAll
     @GET
-    public Response login( ){
-        
+    public Response login() {
+
         try {
             String token = JWTManager.generateJWTString("token.json");
             System.out.println("------------ generated token -------------------");
@@ -43,12 +49,15 @@ public class SecurityResource {
         }
         return Response.ok().build();
     }
-    
+
+    @PermitAll
     @POST
-    public Response login( @FormParam("usr") String usr, @FormParam("pwd") String pwd){
+    public Response login(@FormParam("usr") String usr, @FormParam("pwd") String pwd) {
         Optional<User> p = store.login(usr, pwd);
         p.ifPresent(a -> System.out.println(a.getNome()));
-        return p.isPresent() ?  Response.ok().build():
-                Response.status(Response.Status.UNAUTHORIZED).build();
+        JsonObject token = Json.createObjectBuilder().add("token",
+                JWTManager.generateJWTString("token.json", p.get().getUsr())).build();
+        return p.isPresent() ? Response.ok().entity(token).build()
+                : Response.status(Response.Status.UNAUTHORIZED).build();
     }
 }

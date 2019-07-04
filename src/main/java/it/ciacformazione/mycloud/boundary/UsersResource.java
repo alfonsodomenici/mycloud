@@ -10,9 +10,11 @@ import it.ciacformazione.mycloud.control.UserStore;
 import it.ciacformazione.mycloud.entity.User;
 import java.net.URI;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -26,6 +28,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -33,6 +36,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  * @author tss
  */
 @DenyAll
+@RequestScoped
 @Path("/users")
 public class UsersResource {
 
@@ -45,8 +49,13 @@ public class UsersResource {
     @Inject
     JsonWebToken callerPrincipal;
     
+    @PostConstruct
+    public void init(){
+        System.out.println("caller principal: " + callerPrincipal.getClaim(Claims.upn.name()) + " groups: " + callerPrincipal.getGroups());
+    }
+    
     @GET
-    @RolesAllowed({"dev"})
+    @RolesAllowed({"users"})
     public List<User> findAll() {
         return store.findAll();
     }

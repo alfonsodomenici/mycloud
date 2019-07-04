@@ -1,0 +1,39 @@
+main{
+    height: 100vh;
+    display: grid !important;
+    grid-template-areas:
+        "header"
+        "article"
+        "footer";
+    grid-template-rows: 1fr 6fr .5fr;
+}
+
+header{
+    grid-area: "header";
+}
+
+article{
+    grid-area: "article";
+    margin: 0 auto;
+    padding: 0 2em;
+    margin-bottom: 50px;
+    line-height: 1.6em;
+}
+
+footer{
+    grid-area: "footer";
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-select{
+    cursor: pointer;
+}
+.table-select .row-select{
+    background: lightgray;
+}
+table.table-select tbody tr:hover{
+    background: lightyellow;
+}
