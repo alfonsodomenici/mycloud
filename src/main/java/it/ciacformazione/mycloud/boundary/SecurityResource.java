@@ -5,11 +5,16 @@
  */
 package it.ciacformazione.mycloud.boundary;
 
+import it.ciacformazione.mycloud.JWTManager;
 import it.ciacformazione.mycloud.control.UserStore;
 import it.ciacformazione.mycloud.entity.User;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -23,6 +28,21 @@ public class SecurityResource {
     
     @Inject
     UserStore store;
+    
+    @PermitAll
+    @GET
+    public Response login( ){
+        
+        try {
+            String token = JWTManager.generateJWTString("token.json");
+            System.out.println("------------ generated token -------------------");
+            System.out.println("------------ curl command for test -------------");
+            System.out.println("curl -i -H'Authorization: Bearer " + token + "' http://localhost:8080/mycloud/resources/users");
+        } catch (Exception ex) {
+            Logger.getLogger(SecurityResource.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Response.ok().build();
+    }
     
     @POST
     public Response login( @FormParam("usr") String usr, @FormParam("pwd") String pwd){

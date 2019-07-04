@@ -14,14 +14,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
  *
@@ -32,25 +35,31 @@ public class DocumentoStore {
 
     @PersistenceContext
     EntityManager em;
+
+    @Inject
+    Principal principal;
+
+    @Inject
+    JsonWebToken callerPrincipal;
     
     User logged;
-    
+
     @PostConstruct
-    public void init(){
+    public void init() {
         logged = em.find(User.class, 1l);
-        
+
     }
-    
-    public List<Documento> all(){
+
+    public List<Documento> all() {
         return em.createQuery("select e from Documento e where e.user= :usr")
                 .setParameter("usr", logged)
                 .getResultList();
     }
-    
-    public Documento find(Long id){
+
+    public Documento find(Long id) {
         return em.find(Documento.class, id);
     }
-    
+
     public Documento save(Documento d, InputStream is) {
         d.setUser(logged);
         Documento saved = em.merge(d);
@@ -62,7 +71,7 @@ public class DocumentoStore {
         }
         return saved;
     }
-    
+
     public void remove(Long id) {
         Documento saved = find(id);
         try {
@@ -72,11 +81,11 @@ public class DocumentoStore {
         }
         em.remove(saved);
     }
-    
-    private Path documentPath(String name){
+
+    private Path documentPath(String name) {
         System.out.println("user: " + logged + " name: " + name);
-        return Paths.get(Configuration.DOCUMENT_FOLDER + 
-                logged.getUsr() + "/" + name);
+        return Paths.get(Configuration.DOCUMENT_FOLDER
+                + logged.getUsr() + "/" + name);
     }
 
     void removeByUser(Long id) {

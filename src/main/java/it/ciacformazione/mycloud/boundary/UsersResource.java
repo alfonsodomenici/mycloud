@@ -10,6 +10,9 @@ import it.ciacformazione.mycloud.control.UserStore;
 import it.ciacformazione.mycloud.entity.User;
 import java.net.URI;
 import java.util.List;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -23,11 +26,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
  *
  * @author tss
  */
+@DenyAll
 @Path("/users")
 public class UsersResource {
 
@@ -37,13 +42,18 @@ public class UsersResource {
     @Context
     ResourceContext rc;
     
+    @Inject
+    JsonWebToken callerPrincipal;
+    
     @GET
+    @RolesAllowed({"dev"})
     public List<User> findAll() {
         return store.findAll();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @PermitAll
     public Response create(User a, @Context UriInfo uriInfo) {
         User saved = store.save(a);
         URI uri = uriInfo.getAbsolutePathBuilder()
@@ -54,6 +64,7 @@ public class UsersResource {
     
     @GET
     @Path("{id}")
+    @RolesAllowed({"users"})
     public User find(@PathParam("id") Long id) {
         return store.find(id);
     }
@@ -61,6 +72,7 @@ public class UsersResource {
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"users"})
     public void update(@PathParam("id") Long id, User a) {
         a.setId(id);
         store.save(a);
@@ -68,6 +80,7 @@ public class UsersResource {
 
     @DELETE
     @Path("{id}")
+    @RolesAllowed({"users"})
     public void delete(@PathParam("id") Long id) {
         store.remove(id);
     }
