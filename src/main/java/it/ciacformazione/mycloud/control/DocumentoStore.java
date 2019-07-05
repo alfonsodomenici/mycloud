@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -40,6 +42,9 @@ public class DocumentoStore {
 
     @Inject
     Principal principal;
+    
+    @Inject
+    JsonWebToken token;
 
     @Inject
     UserStore userStore;
@@ -50,7 +55,8 @@ public class DocumentoStore {
     }
 
     public List<Documento> all() {
-        System.out.println("logged user: " + principal.getName());
+        System.out.println("token user: " + token.getName());
+        System.out.println("token email: " + token.getClaim(Claims.email.name()));
         return em.createQuery("select e from Documento e where e.user.usr= :usr")
                 .setParameter("usr", principal.getName())
                 .getResultList();
@@ -62,7 +68,9 @@ public class DocumentoStore {
 
     
     public Documento save(Documento d, InputStream is) {
-        d.setUser(userStore.findByUsername(principal.getName()).get());
+        Optional<User> user = userStore.findByUsr(principal.getName());
+        User logged = user.orElseThrow(() -> new EJBException("utente non trovato: " + principal.getName()));
+        d.setUser(logged);
         Documento saved = em.merge(d);
         try {
             Files.copy(is, documentPath(saved.getFileName()),
@@ -88,7 +96,5 @@ public class DocumentoStore {
                 + principal.getName() + "/" + name);
     }
 
-    void removeByUser(Long id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+   
 }

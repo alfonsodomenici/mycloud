@@ -18,10 +18,12 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -37,6 +39,7 @@ public class SecurityResource {
 
     @PermitAll
     @GET
+    @Path("test")
     public Response login() {
 
         try {
@@ -52,12 +55,16 @@ public class SecurityResource {
 
     @PermitAll
     @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response login(@FormParam("usr") String usr, @FormParam("pwd") String pwd) {
+        System.out.println(usr + " " + pwd);
         Optional<User> p = store.login(usr, pwd);
-        p.ifPresent(a -> System.out.println(a.getNome()));
-        JsonObject token = Json.createObjectBuilder().add("token",
+        if (p.isPresent()) {
+            JsonObject token = Json.createObjectBuilder().add("token",
                 JWTManager.generateJWTString("token.json", p.get().getUsr())).build();
-        return p.isPresent() ? Response.ok().entity(token).build()
-                : Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.ok().entity(token).build();
+        }
+        
+        return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 }

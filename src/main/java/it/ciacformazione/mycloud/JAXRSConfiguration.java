@@ -24,6 +24,7 @@ public class JAXRSConfiguration extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> resources = new java.util.HashSet<>();
         resources.add(MultiPartFeature.class);
+        resources.add(com.airhacks.cors.CorsResponseFilter.class);
         addRestResourceClasses(resources);
         return resources;
     }
