@@ -9,6 +9,7 @@ import it.ciacformazione.mycloud.control.DocumentoStore;
 import it.ciacformazione.mycloud.entity.Documento;
 import java.io.InputStream;
 import java.util.List;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -54,7 +55,8 @@ public class DocumentiResource {
     
     @GET
     @Path("download")
-    public Response download(@QueryParam("name") String fileName) {
+    public Response download(@QueryParam("name") String fileName,
+            @QueryParam("usr") String usr) {
         
         Response.ResponseBuilder response = Response.ok(store.getFile(fileName));
     

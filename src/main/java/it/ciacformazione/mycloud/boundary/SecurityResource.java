@@ -23,6 +23,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -55,10 +56,11 @@ public class SecurityResource {
 
     @PermitAll
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response login(@FormParam("usr") String usr, @FormParam("pwd") String pwd) {
-        System.out.println(usr + " " + pwd);
-        Optional<User> p = store.login(usr, pwd);
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response login(Credential cred) {
+        System.out.println(cred.usr + " " + cred.pwd);
+        Optional<User> p = store.login(cred.usr, cred.pwd);
         if (p.isPresent()) {
             JsonObject token = Json.createObjectBuilder().add("token",
                 JWTManager.generateJWTString("token.json", p.get().getUsr())).build();
