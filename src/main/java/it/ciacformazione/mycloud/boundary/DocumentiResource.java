@@ -15,6 +15,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -49,5 +50,16 @@ public class DocumentiResource {
         store.save(doc, is);
         return Response.status(200).build();
 
+    }
+    
+    @GET
+    @Path("download")
+    public Response download(@QueryParam("name") String fileName) {
+        
+        Response.ResponseBuilder response = Response.ok(store.getFile(fileName));
+    
+        response.header("Content-Disposition","attachment; filename=\"" + fileName + "\"");  
+    
+        return response.build();
     }
 }

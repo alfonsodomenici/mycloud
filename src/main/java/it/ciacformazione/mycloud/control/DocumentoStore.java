@@ -8,6 +8,7 @@ package it.ciacformazione.mycloud.control;
 import it.ciacformazione.mycloud.Configuration;
 import it.ciacformazione.mycloud.entity.Documento;
 import it.ciacformazione.mycloud.entity.User;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -92,9 +93,19 @@ public class DocumentoStore {
     }
 
     private Path documentPath(String name) {
-        return Paths.get(Configuration.DOCUMENT_FOLDER
-                + principal.getName() + "/" + name);
+        return documentPath(name, principal.getName());
     }
 
-   
+    private Path documentPath(String name, String user) {
+        return Paths.get(Configuration.DOCUMENT_FOLDER
+                + user + "/" + name);
+    }
+    
+    public File getFile(String fileName){
+        return documentPath(fileName).toFile();
+    }
+    
+    public File getFile(String fileName, String user){
+        return documentPath(fileName,user).toFile();
+    }
 }
